@@ -1,6 +1,15 @@
 const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
+const load_asteroids = (canvas) => {
+    const n = random_integer(5, 10);
+    return Array.from({length: n}, (v, i) => {
+        const x = random_integer(0, canvas.width);
+        const y = random_integer(0, canvas.height);
+        return new Asteroid(canvas, x, y);
+    });
+};
+
 class Asteroid {
     constructor(canvas, x, y) {
         this.canvas = canvas;
