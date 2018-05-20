@@ -13,6 +13,11 @@ class Bullet {
         this.img.src = "static/bullet.png";
     }
 
+    outside_canvas() {
+        return this.x > canvas.width || this.x < 0
+            || this.y > canvas.height || this.y < 0;
+    }
+
     move() {
         this.x = this.x + this.dx;
         this.y = this.y + this.dy;
@@ -104,7 +109,7 @@ window.addEventListener("load", () => {
         player.draw(ctx);
 
         for (let bullet of player.bullets) {
-            if (bullet.x >= canvas.width || bullet.x <= 0 || bullet.y >= canvas.height || bullet.y <= 0) {
+            if (bullet.outside_canvas()) {
                 continue;
             }
 
