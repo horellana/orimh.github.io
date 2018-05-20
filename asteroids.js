@@ -1,3 +1,8 @@
+const random_integer = (start, end) => {
+    return Math.floor(Math.random() * end + start);
+};
+}
+
 class Bullet {
     constructor(canvas, x, y, dx, dy, rotation) {
         this.canvas = canvas;
