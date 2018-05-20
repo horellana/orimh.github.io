@@ -1,3 +1,34 @@
+class Bullet {
+    constructor(canvas, x, y, dx, dy, rotation) {
+        this.canvas = canvas;
+
+        this.x = x;
+        this.y = y;
+
+        this.dx = dx;
+        this.dy = dy;
+
+        this.rotation = rotation;
+        this.img = new Image();
+        this.img.src = "static/bullet.png";
+    }
+
+    move() {
+        this.x = this.x + this.dx;
+        this.y = this.y + this.dy;
+    }
+
+    draw() {
+        const ctx = this.canvas.getContext("2d");
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.drawImage(this.img, 0, 0);
+        ctx.restore();
+    }
+}
+
 class Player {
     constructor(canvas) {
         this.canvas = canvas;
@@ -12,6 +43,8 @@ class Player {
 
         this.img = new Image();
         this.img.src = "static/player.png";
+
+        this.bullets = new Array();
     }
 
     dx() {
@@ -48,6 +81,15 @@ class Player {
                 break;
             }
         });
+
+        window.addEventListener("keydown", (event) => {
+            // 32 <=> Tecla espacio
+            if (event.keyCode != 32) {
+                return;
+            }
+            const bullet = new Bullet(this.canvas, this.x, this.y, this.dx(), this.dy(), this.rotation);
+            this.bullets.push(bullet);
+        });
     }
 };
 
@@ -60,6 +102,16 @@ window.addEventListener("load", () => {
         ctx.fillStyle = "White";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         player.draw(ctx);
+
+        for (let bullet of player.bullets) {
+            if (bullet.x >= canvas.width || bullet.x <= 0 || bullet.y >= canvas.height || bullet.y <= 0) {
+                continue;
+            }
+
+            bullet.draw();
+            bullet.move();
+        }
+
         ctx.stroke();
     };
 
