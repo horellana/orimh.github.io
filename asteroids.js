@@ -7,10 +7,19 @@ class Player {
         this.y = this.canvas.height / 2;
 
         this.rotation = 0;
-        this.speed = 10;
+        this.speed = -10;
+        this.rotation_speed = 10;
 
         this.img = new Image();
         this.img.src = "static/player.png";
+    }
+
+    dx() {
+        return Math.round(-1 * this.speed * Math.sin(this.rotation * Math.PI / 180));
+    }
+
+    dy() {
+        return Math.round(this.speed * Math.cos(this.rotation * Math.PI / 180));
     }
 
     draw(ctx) {
@@ -22,22 +31,28 @@ class Player {
         ctx.restore();
     }
 
+    fix_rotation() {
+        if (this.rotation >= 360 || this.rotation <= -360){
+            this.rotation = 0;
+        }
+    }
+
     _set_event_listeners() {
         window.addEventListener("keypress", (event) => {
             const keyName = event.key;
 
             switch (keyName) {
             case "ArrowUp":
-                this.y = this.y - this.speed;
-                break;
-            case "ArrowDown":
-                this.y = this.y + this.speed;
+                this.y = this.y + this.dy();
+                this.x = this.x + this.dx();
                 break;
             case "ArrowLeft":
-                this.x = this.x - this.speed;
+                this.rotation = this.rotation - this.rotation_speed;
+                this.fix_rotation();
                 break;
             case "ArrowRight":
-                this.x = this.x + this.speed;
+                this.rotation = this.rotation + this.rotation_speed;
+                this.fix_rotation();
                 break;
             }
         });
@@ -57,4 +72,10 @@ window.addEventListener("load", () => {
     };
 
     window.setInterval(game_loop, 10);
+
+    window.setInterval(() => {
+        document.getElementById('rotation').innerHTML = player.rotation;
+        document.getElementById('dx').innerHTML = player.dx();
+        document.getElementById('dy').innerHTML = player.dy();
+    });
 });
