@@ -126,7 +126,7 @@ class Player {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.drawImage(this.img, 0, 0);
+        ctx.drawImage(this.img, 0, 0, 50, 50);
         ctx.restore();
     }
 
