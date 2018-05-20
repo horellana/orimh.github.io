@@ -1,6 +1,35 @@
 const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
+class Asteroid {
+    constructor(canvas, x, y) {
+        this.canvas = canvas;
+        this._load_img();
+
+        this.x = x;
+        this.y = y;
+
+        this.dx = random_integer(-5, 10);
+        this.dy = random_integer(-5, 10);
+    }
+
+    _load_img() {
+        const index = random_integer(1, 3);
+        this.img = new Image();
+        this.img.src = `static/asteroid_${index}.png`;
+    }
+
+    draw() {
+        const ctx = this.canvas.getContext("2d");
+        ctx.drawImage(this.img, this.x, this.y);
+    }
+
+    move() {
+        this.x = this.x + this.dx;
+        this.y = this.y + this.dy;
+
+
+    }
 }
 
 class Bullet {
