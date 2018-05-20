@@ -1,6 +1,24 @@
 const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
+const infinite_movement = (obj) => {
+    if (obj.x > obj.canvas.width) {
+        obj.x = 0;
+    }
+
+    if (obj.x < 0) {
+        obj.x = obj.canvas.width;
+    }
+
+    if  (obj.y < 0) {
+        obj.y = obj.canvas.height;
+    }
+
+    if (obj.y > obj.canvas.height) {
+        obj.y = 0;
+    }
+};
+
 const load_asteroids = (canvas) => {
     const n = random_integer(5, 10);
     return Array.from({length: n}, (v, i) => {
