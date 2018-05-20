@@ -1,6 +1,7 @@
 const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
+
 const infinite_movement = (obj) => {
     if (obj.x > obj.canvas.width) {
         obj.x = 0;
@@ -126,12 +127,11 @@ class Player {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation * Math.PI / 180);
         ctx.drawImage(this.img, 0, 0);
-        ctx.stroke();
         ctx.restore();
     }
 
     _set_event_listeners() {
-        window.addEventListener("keypress", (event) => {
+        window.addEventListener("keydown", (event) => {
             const keyName = event.key;
 
             switch (keyName) {
@@ -163,11 +163,15 @@ window.addEventListener("load", () => {
     const canvas = document.getElementById('canvas');
     const player = new Player(canvas);
 
+    let asteroids = load_asteroids(canvas);
+
     const game_loop = () => {
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "White";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         player.draw(ctx);
+
+        infinite_movement(player);
 
         for (let bullet of player.bullets) {
             if (bullet.outside_canvas()) {
@@ -176,16 +180,25 @@ window.addEventListener("load", () => {
 
             bullet.draw();
             bullet.move();
+            infinite_movement(bullet);
+        }
+
+        for (let asteroid of asteroids) {
+            asteroid.draw();
+            asteroid.move();
+            infinite_movement(asteroid);
         }
 
         ctx.stroke();
     };
 
-    window.setInterval(game_loop, 10);
+    window.setInterval(game_loop, 20);
 
     window.setInterval(() => {
         document.getElementById('rotation').innerHTML = player.rotation;
         document.getElementById('dx').innerHTML = player.dx();
         document.getElementById('dy').innerHTML = player.dy();
-    });
+        document.getElementById('bullets').innerHTML = player.bullets.length;
+        document.getElementById('asteroids').innerHTML = asteroids.length;
+    }, 500);
 });
