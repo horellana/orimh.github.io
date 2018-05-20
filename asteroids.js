@@ -31,12 +31,6 @@ class Player {
         ctx.restore();
     }
 
-    fix_rotation() {
-        if (this.rotation >= 360 || this.rotation <= -360){
-            this.rotation = 0;
-        }
-    }
-
     _set_event_listeners() {
         window.addEventListener("keypress", (event) => {
             const keyName = event.key;
@@ -48,11 +42,9 @@ class Player {
                 break;
             case "ArrowLeft":
                 this.rotation = this.rotation - this.rotation_speed;
-                this.fix_rotation();
                 break;
             case "ArrowRight":
                 this.rotation = this.rotation + this.rotation_speed;
-                this.fix_rotation();
                 break;
             }
         });
