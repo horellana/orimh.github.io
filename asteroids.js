@@ -1,9 +1,12 @@
 class Player {
     constructor(canvas) {
+        this.canvas = canvas;
         this._set_event_listeners();
 
-        this.x = canvas.width / 2;
-        this.y = canvas.height / 2;
+        this.x = this.canvas.width / 2;
+        this.y = this.canvas.height / 2;
+
+        this.rotation = 0;
         this.speed = 10;
 
         this.img = new Image();
@@ -11,7 +14,12 @@ class Player {
     }
 
     draw(ctx) {
-        ctx.drawImage(this.img, this.x, this.y);
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.drawImage(this.img, 0, 0);
+        ctx.stroke();
+        ctx.restore();
     }
 
     _set_event_listeners() {
