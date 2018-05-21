@@ -70,7 +70,7 @@ class Asteroid {
         this.collided = false;
         this.size = size;
 
-        this.r = this.size * 25;
+        this.r = this._draw_size() / 2;
 
         this.rotation = rotation;
     }
@@ -249,9 +249,16 @@ window.addEventListener("load", () => {
     window.setInterval(() => {
         for (let b of bullets) {
             for (let a of asteroids) {
-                if (collision(b, a)) {
-                    a.collided = true;
-                    b.collided = true;
+                if (!collision(b, a)) {
+                    continue;
+                }
+
+                a.collided = true;
+                b.collided = true;
+
+                if (a.size > 1) {
+                    asteroids.push(new Asteroid(canvas, a.x, a.y, size=a.size - 1));
+                    asteroids.push(new Asteroid(canvas, a.x, a.y, size=a.size - 1));
                 }
             }
         }
