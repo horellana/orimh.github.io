@@ -2,21 +2,20 @@ const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
 
-
 const infinite_movement = (obj) => {
-    if (obj.x > obj.canvas.width) {
+    if (obj.x > obj.canvas.width + 20) {
         obj.x = 0;
     }
 
-    if (obj.x < 0) {
+    if (obj.x < 0 - 150) {
         obj.x = obj.canvas.width;
     }
 
-    if  (obj.y < 0) {
+    if  (obj.y < 0 - 150) {
         obj.y = obj.canvas.height;
     }
 
-    if (obj.y > obj.canvas.height) {
+    if (obj.y > obj.canvas.height + 20) {
         obj.y = 0;
     }
 };
@@ -29,12 +28,20 @@ const collision = (a, b) => {
 };
 
 const load_asteroids = (canvas) => {
-    const n = random_integer(5, 10);
+    const n = random_integer(5, 20);
     return Array.from({length: n}, (v, i) => {
         const x = random_integer(0, canvas.width);
         const y = random_integer(0, canvas.height);
         return new Asteroid(canvas, x, y);
     });
+};
+
+const calculate_dx = (rotation, speed) => {
+    return Math.round(speed * Math.sin(rotation * Math.PI / 180));
+};
+
+const calculate_dy = (rotation, speed) => {
+    return Math.round(-1 * speed * Math.cos(rotation * Math.PI / 180));
 };
 
 const decelerate = (obj, dv) => {
@@ -57,23 +64,37 @@ class Asteroid {
         this.x = x;
         this.y = y;
 
-        this.r = 25;
-
         this.dx = random_integer(-5, 10);
         this.dy = random_integer(-5, 10);
 
         this.collided = false;
+        this.size = random_integer(1, 3);
+
+        this.r = this.size * 25;
+    }
+
+    _draw_size() {
+        switch(this.size) {
+        case 1:
+            return 50;
+        case 2:
+            return 100;
+        case 3:
+            return 200;
+        default:
+            return 250;
+        }
     }
 
     _load_img() {
-        const index = random_integer(1, 4);
+        const index = random_integer(1, 6);
         this.img = new Image();
         this.img.src = `static/asteroid_${index}.png`;
     }
 
     draw() {
         const ctx = this.canvas.getContext("2d");
-        ctx.drawImage(this.img, this.x, this.y);
+        ctx.drawImage(this.img, this.x, this.y, this._draw_size(), this._draw_size());
     }
 
     move() {
@@ -110,12 +131,7 @@ class Bullet {
                 this.collided = true;
             }
 
-        }, 500);
-    }
-
-    outside_canvas() {
-        return this.x > canvas.width || this.x < 0
-            || this.y > canvas.height || this.y < 0;
+        }, 1000);
     }
 
     move() {
@@ -152,16 +168,14 @@ class Player {
 
         this.img = new Image();
         this.img.src = "static/player.png";
-
-        this.bullets = new Array();
     }
 
     dx() {
-        return Math.round(-1 * this.speed * Math.sin(this.rotation * Math.PI / 180));
+        return calculate_dx(this.rotation, this.speed);
     }
 
     dy() {
-        return Math.round(this.speed * Math.cos(this.rotation * Math.PI / 180));
+        return calculate_dy(this.rotation, this.speed);
     }
 
     draw(ctx) {
@@ -197,55 +211,36 @@ class Player {
                 break;
             }
         });
-
-        window.addEventListener("keydown", (event) => {
-            // 32 <=> Tecla espacio
-            if (event.keyCode != 32) {
-                return;
-            }
-            const bullet = new Bullet(this.canvas, this.x, this.y, this.dx(), this.dy(), this.rotation);
-            this.bullets.push(bullet);
-        });
     }
 };
 
 window.addEventListener("load", () => {
+    const draw_loop_interval = 20;
+    const move_loop_interval = 20;
+    const delete_objects_interval = 100;
+    const update_info_interval = 500;
+    const collision_detection_interval = 100;
+
     const canvas = document.getElementById('canvas');
 
     const player = new Player(canvas);
     let asteroids = load_asteroids(canvas);
+    let bullets = new Array();
 
-    const game_loop = () => {
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "White";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        player.move();
-        player.draw(ctx);
-
-        infinite_movement(player);
-
-        for (let bullet of player.bullets) {
-            if (bullet.outside_canvas()) {
-                continue;
-            }
-
-            bullet.draw();
-            bullet.move();
-            infinite_movement(bullet);
+    window.addEventListener("keydown", (event) => {
+        // 32 <=> Tecla espacio
+        if (event.keyCode != 32) {
+            return;
         }
-
-        for (let asteroid of asteroids) {
-            asteroid.draw();
-            asteroid.move();
-            infinite_movement(asteroid);
-        }
-
-        ctx.stroke();
-    };
+        const bullet = new Bullet(canvas,
+                                  player.x, player.y,
+                                  calculate_dx(player.rotation, 10), calculate_dy(player.rotation, 10),
+                                  player.rotation);
+        bullets.push(bullet);
+    });
 
     window.setInterval(() => {
-        for (let b of player.bullets) {
+        for (let b of bullets) {
             for (let a of asteroids) {
                 if (collision(b, a)) {
                     a.collided = true;
@@ -253,21 +248,52 @@ window.addEventListener("load", () => {
                 }
             }
         }
-    });
+    }, collision_detection_interval);
 
     window.setInterval(() => {
-        player.bullets = player.bullets.filter((bullet) => !bullet.collided);
+        bullets = bullets.filter((bullet) => !bullet.collided);
         asteroids = asteroids.filter((asteroid) => !asteroid.collided);
-    }, 100);
+    }, delete_objects_interval);
 
-    window.setInterval(game_loop, 20);
+    window.setInterval(() => {
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "White";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        player.draw(ctx);
+
+        for (let bullet of bullets) {
+            bullet.draw();
+        }
+
+        for (let asteroid of asteroids) {
+            asteroid.draw();
+        }
+
+        ctx.stroke();
+    }, draw_loop_interval);
+
+    window.setInterval(() => {
+        player.move();
+        infinite_movement(player);
+
+        for (let bullet of bullets) {
+            bullet.move();
+            infinite_movement(bullet);
+        }
+
+        for (let asteroid of asteroids) {
+            asteroid.move();
+            infinite_movement(asteroid);
+        }
+    }, move_loop_interval);
 
     window.setInterval(() => {
         document.getElementById('speed').innerHTML = player.speed;
         document.getElementById('rotation').innerHTML = player.rotation;
         document.getElementById('dx').innerHTML = player.dx();
         document.getElementById('dy').innerHTML = player.dy();
-        document.getElementById('bullets').innerHTML = player.bullets.length;
+        document.getElementById('bullets').innerHTML = bullets.length;
         document.getElementById('asteroids').innerHTML = asteroids.length;
-    }, 250);
+    }, update_info_interval);
 });
