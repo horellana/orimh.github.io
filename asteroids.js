@@ -2,6 +2,7 @@ const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
 
+
 const infinite_movement = (obj) => {
     if (obj.x > obj.canvas.width) {
         obj.x = 0;
@@ -66,8 +67,6 @@ class Asteroid {
     move() {
         this.x = this.x + this.dx;
         this.y = this.y + this.dy;
-
-
     }
 }
 
@@ -88,6 +87,18 @@ class Bullet {
         this.img.src = "static/bullet.png";
 
         this.collided = false;
+
+        this.start_time = new Date();
+
+        window.setInterval(() => {
+            const end_time = new Date();
+            const elapsed_seconds = Math.round((end_time - this.start_time) / 1000);
+
+            if (elapsed_seconds > 1) {
+                this.collided = true;
+            }
+
+        }, 500);
     }
 
     outside_canvas() {
@@ -231,5 +242,5 @@ window.addEventListener("load", () => {
         document.getElementById('dy').innerHTML = player.dy();
         document.getElementById('bullets').innerHTML = player.bullets.length;
         document.getElementById('asteroids').innerHTML = asteroids.length;
-    }, 500);
+    }, 250);
 });
