@@ -37,6 +37,18 @@ const load_asteroids = (canvas) => {
     });
 };
 
+const decelerate = (obj, dv) => {
+    window.setInterval(() => {
+        if (obj.speed > 0) {
+            obj.speed = obj.speed - dv;
+        }
+
+        if (obj.speed < 0) {
+            obj.speed = 0;
+        }
+    }, 500);
+};
+
 class Asteroid {
     constructor(canvas, x, y) {
         this.canvas = canvas;
@@ -131,7 +143,11 @@ class Player {
         this.y = this.canvas.height / 2;
 
         this.rotation = 0;
-        this.speed = -10;
+
+        this.speed = 0;
+        this.max_speed = 10;
+        this.acceleration = 2;
+
         this.rotation_speed = 10;
 
         this.img = new Image();
@@ -156,14 +172,22 @@ class Player {
         ctx.restore();
     }
 
+    move() {
+        this.y = this.y + this.dy();
+        this.x = this.x + this.dx();
+    }
+
     _set_event_listeners() {
+        decelerate(this, 2);
+
         window.addEventListener("keydown", (event) => {
             const keyName = event.key;
 
             switch (keyName) {
             case "ArrowUp":
-                this.y = this.y + this.dy();
-                this.x = this.x + this.dx();
+                if (this.speed < this.max_speed) {
+                    this.speed = this.speed + this.acceleration;
+                }
                 break;
             case "ArrowLeft":
                 this.rotation = this.rotation - this.rotation_speed;
@@ -187,14 +211,16 @@ class Player {
 
 window.addEventListener("load", () => {
     const canvas = document.getElementById('canvas');
-    const player = new Player(canvas);
 
+    const player = new Player(canvas);
     let asteroids = load_asteroids(canvas);
 
     const game_loop = () => {
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "White";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        player.move();
         player.draw(ctx);
 
         infinite_movement(player);
@@ -237,6 +263,7 @@ window.addEventListener("load", () => {
     window.setInterval(game_loop, 20);
 
     window.setInterval(() => {
+        document.getElementById('speed').innerHTML = player.speed;
         document.getElementById('rotation').innerHTML = player.rotation;
         document.getElementById('dx').innerHTML = player.dx();
         document.getElementById('dy').innerHTML = player.dy();
