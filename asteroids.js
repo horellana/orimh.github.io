@@ -20,6 +20,13 @@ const infinite_movement = (obj) => {
     }
 };
 
+const collision = (a, b) => {
+    const dist_x = a.x - b.x;
+    const dist_y = a.y - b.y;
+    const dist = Math.sqrt((dist_x * dist_x) + (dist_y * dist_y));
+    return dist <= (a.r + b.r);
+};
+
 const load_asteroids = (canvas) => {
     const n = random_integer(5, 10);
     return Array.from({length: n}, (v, i) => {
@@ -37,12 +44,16 @@ class Asteroid {
         this.x = x;
         this.y = y;
 
+        this.r = 25;
+
         this.dx = random_integer(-5, 10);
         this.dy = random_integer(-5, 10);
+
+        this.collided = false;
     }
 
     _load_img() {
-        const index = random_integer(1, 3);
+        const index = random_integer(1, 4);
         this.img = new Image();
         this.img.src = `static/asteroid_${index}.png`;
     }
@@ -70,9 +81,13 @@ class Bullet {
         this.dx = dx;
         this.dy = dy;
 
+        this.r = 5;
+
         this.rotation = rotation;
         this.img = new Image();
         this.img.src = "static/bullet.png";
+
+        this.collided = false;
     }
 
     outside_canvas() {
@@ -91,7 +106,7 @@ class Bullet {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.drawImage(this.img, 0, 0);
+        ctx.drawImage(this.img, 0, 0, 50, 50);
         ctx.restore();
     }
 }
@@ -191,6 +206,22 @@ window.addEventListener("load", () => {
 
         ctx.stroke();
     };
+
+    window.setInterval(() => {
+        for (let b of player.bullets) {
+            for (let a of asteroids) {
+                if (collision(b, a)) {
+                    a.collided = true;
+                    b.collided = true;
+                }
+            }
+        }
+    });
+
+    window.setInterval(() => {
+        player.bullets = player.bullets.filter((bullet) => !bullet.collided);
+        asteroids = asteroids.filter((asteroid) => !asteroid.collided);
+    }, 100);
 
     window.setInterval(game_loop, 20);
 
