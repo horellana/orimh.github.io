@@ -190,7 +190,8 @@ class Player {
         return calculate_dy(this.rotation, this.speed);
     }
 
-    draw(ctx) {
+    draw() {
+        const ctx = this.canvas.getContext("2d");
         draw(ctx, this, 50);
     }
 
@@ -225,10 +226,10 @@ class Player {
 window.addEventListener("load", () => {
     const draw_loop_interval = 20;
     const move_loop_interval = 20;
-    const delete_objects_interval = 100;
+    const delete_objects_interval = 250;
     const update_info_interval = 500;
-    const collision_detection_interval = 100;
-    const kill_player_interval = 100;
+    const collision_detection_interval = 250;
+    const kill_player_interval = 250;
 
     const canvas = document.getElementById('canvas');
 
@@ -285,34 +286,17 @@ window.addEventListener("load", () => {
         ctx.fillStyle = "White";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        player.draw(ctx);
-        // draw_radius(ctx, player);
-
-        for (let bullet of bullets) {
-            bullet.draw();
-            // draw_radius(ctx, bullet);
-        }
-
-        for (let asteroid of asteroids) {
-            asteroid.draw();
-            // draw_radius(ctx, asteroid);
+        for (const obj of (Array.concat([player], bullets, asteroids))) {
+            obj.draw();
         }
 
         ctx.stroke();
     }, draw_loop_interval);
 
     window.setInterval(() => {
-        player.move();
-        infinite_movement(player);
-
-        for (let bullet of bullets) {
-            bullet.move();
-            infinite_movement(bullet);
-        }
-
-        for (let asteroid of asteroids) {
-            asteroid.move();
-            infinite_movement(asteroid);
+        for (const obj of (Array.concat([player], bullets, asteroids))) {
+            obj.move();
+            infinite_movement(obj);
         }
     }, move_loop_interval);
 
