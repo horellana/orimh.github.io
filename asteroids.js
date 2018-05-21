@@ -1,3 +1,17 @@
+const draw = (ctx, obj, size) => {
+    ctx.save();
+    ctx.translate(obj.x, obj.y);
+    ctx.rotate(obj.rotation * Math.PI / 180);
+    ctx.drawImage(obj.img, -obj.r, -obj.r, size, size);
+    ctx.restore();
+};
+
+const draw_radius = (ctx, obj) => {
+    ctx.beginPath();
+    ctx.arc(obj.x, obj.y, obj.r, 0, 2 * Math.PI);
+    ctx.stroke();
+};
+
 const random_integer = (start, end) => {
     return Math.floor(Math.random() * end + start);
 };
@@ -64,13 +78,13 @@ class Asteroid {
         this.x = x;
         this.y = y;
 
-        this.dx = random_integer(-5, 10);
-        this.dy = random_integer(-5, 10);
+        this.dx = random_integer(-5, 5);
+        this.dy = random_integer(-5, 5);
 
         this.collided = false;
         this.size = size;
 
-        this.r = this._draw_size() / 2;
+        this.r = this._draw_size() * 0.5;
 
         this.rotation = rotation;
     }
@@ -96,12 +110,7 @@ class Asteroid {
 
     draw() {
         const ctx = this.canvas.getContext("2d");
-
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.drawImage(this.img, 0, 0, this._draw_size(), this._draw_size());
-        ctx.restore();
+        draw(ctx, this, this._draw_size());
     }
 
     move() {
@@ -148,12 +157,7 @@ class Bullet {
 
     draw() {
         const ctx = this.canvas.getContext("2d");
-
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.drawImage(this.img, 0, 0, 50, 50);
-        ctx.restore();
+        draw(ctx, this, 50);
     }
 }
 
@@ -165,6 +169,7 @@ class Player {
         this.x = this.canvas.width / 2;
         this.y = this.canvas.height / 2;
 
+        this.r = 25;
         this.rotation = 0;
 
         this.speed = 0;
@@ -186,11 +191,7 @@ class Player {
     }
 
     draw(ctx) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation * Math.PI / 180);
-        ctx.drawImage(this.img, 0, 0, 50, 50);
-        ctx.restore();
+        draw(ctx, this, 50);
     }
 
     move() {
@@ -227,6 +228,7 @@ window.addEventListener("load", () => {
     const delete_objects_interval = 100;
     const update_info_interval = 500;
     const collision_detection_interval = 100;
+    const kill_player_interval = 100;
 
     const canvas = document.getElementById('canvas');
 
@@ -245,6 +247,15 @@ window.addEventListener("load", () => {
                                   player.rotation);
         bullets.push(bullet);
     });
+
+    window.setInterval(() => {
+        for (const asteroid of asteroids) {
+            if (!collision(player, asteroid)) {
+                continue;
+            }
+            console.log("You have been killed!");
+        }
+    }, kill_player_interval);
 
     window.setInterval(() => {
         for (let b of bullets) {
@@ -275,13 +286,16 @@ window.addEventListener("load", () => {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         player.draw(ctx);
+        // draw_radius(ctx, player);
 
         for (let bullet of bullets) {
             bullet.draw();
+            // draw_radius(ctx, bullet);
         }
 
         for (let asteroid of asteroids) {
             asteroid.draw();
+            // draw_radius(ctx, asteroid);
         }
 
         ctx.stroke();
