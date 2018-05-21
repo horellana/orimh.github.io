@@ -57,7 +57,7 @@ const decelerate = (obj, dv) => {
 };
 
 class Asteroid {
-    constructor(canvas, x, y) {
+    constructor(canvas, x, y, size=random_integer(1, 3), rotation=random_integer(0, 360)) {
         this.canvas = canvas;
         this._load_img();
 
@@ -68,9 +68,11 @@ class Asteroid {
         this.dy = random_integer(-5, 10);
 
         this.collided = false;
-        this.size = random_integer(1, 3);
+        this.size = size;
 
         this.r = this.size * 25;
+
+        this.rotation = rotation;
     }
 
     _draw_size() {
@@ -94,7 +96,12 @@ class Asteroid {
 
     draw() {
         const ctx = this.canvas.getContext("2d");
-        ctx.drawImage(this.img, this.x, this.y, this._draw_size(), this._draw_size());
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.drawImage(this.img, 0, 0, this._draw_size(), this._draw_size());
+        ctx.restore();
     }
 
     move() {
