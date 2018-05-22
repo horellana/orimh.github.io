@@ -274,6 +274,7 @@ window.addEventListener("load", () => {
     let asteroids = load_asteroids(canvas);
     let bullets = new Array();
     let fps_limiter = new FrameLimiter(60);
+    let should_draw_radius = false;
 
     window.addEventListener("keydown", (event) => {
         switch (event.keyCode) {
@@ -289,6 +290,9 @@ window.addEventListener("load", () => {
             asteroids = load_asteroids(canvas);
             player = new Player(canvas);
             bullets = new Array();
+            break;
+        case 83:
+            should_draw_radius = !should_draw_radius;
             break;
         }
     });
@@ -339,6 +343,10 @@ window.addEventListener("load", () => {
 
             for (const obj of (Array.concat([player], bullets, asteroids))) {
                 obj.draw();
+
+                if (should_draw_radius)
+                    draw_radius(ctx, obj);
+
             }
 
             ctx.stroke();
