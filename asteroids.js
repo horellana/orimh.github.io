@@ -166,6 +166,8 @@ class Player {
         this.canvas = canvas;
         this._set_event_listeners();
 
+        this.hp = 100;
+
         this.x = this.canvas.width / 2;
         this.y = this.canvas.height / 2;
 
@@ -291,8 +293,8 @@ window.addEventListener("load", () => {
 
     window.setInterval(() => {
         for (const asteroid of asteroids) {
-            if (!collision(player, asteroid)) {
-                continue;
+            if (collision(player, asteroid)) {
+                player.hp = player.hp - 10;
             }
         }
     }, kill_player_interval);
@@ -330,6 +332,7 @@ window.addEventListener("load", () => {
             ctx.font = '18px Cambria';
             ctx.fillText(`FPS: ${fps_limiter.fps()}`, 5, 20);
             ctx.fillText(`Asteroids: ${asteroids.length}`, 5, 35);
+            ctx.fillText(`HP: ${player.hp}`, 5, 55);
             ctx.stroke();
 
             for (const obj of (Array.concat([player], bullets, asteroids))) {
