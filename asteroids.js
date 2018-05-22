@@ -270,7 +270,7 @@ window.addEventListener("load", () => {
 
     const canvas = document.getElementById('canvas');
 
-    const player = new Player(canvas);
+    let player = new Player(canvas);
     let asteroids = load_asteroids(canvas);
     let bullets = new Array();
     let fps_limiter = new FrameLimiter(60);
@@ -287,6 +287,8 @@ window.addEventListener("load", () => {
             break;
         case 82:
             asteroids = load_asteroids(canvas);
+            player = new Player(canvas);
+            bullets = new Array();
             break;
         }
     });
