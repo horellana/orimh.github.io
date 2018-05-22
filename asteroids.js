@@ -223,8 +223,43 @@ class Player {
     }
 };
 
+class FrameLimiter {
+    constructor(max_fps) {
+        this.frames_this_second = 0;
+        this.total_frames = 0;
+        this.max_fps = max_fps;
+        this.start = new Date();
+        this.second_start = new Date();
+    }
+
+    fps() {
+        const end_time = new Date();
+        const elapsed_seconds = (end_time - this.start) / 1000;
+        return Math.round(this.total_frames / elapsed_seconds);
+    }
+
+    limit(f) {
+        this.frames_this_second = this.frames_this_second + 1;
+
+        const end_time = new Date();
+        const elapsed_seconds = (end_time - this.second_start) / 1000;
+
+        if (elapsed_seconds > 1) {
+            this.second_start = end_time;
+            this.total_frames = this.total_frames + this.frames_this_second;
+            this.frames_this_second = 0;
+
+            if (this.fps() >= this.max_fps) {
+                return;
+            }
+        }
+
+        f();
+    }
+}
+
 window.addEventListener("load", () => {
-    const draw_loop_interval = 20;
+    const draw_loop_interval = 15;
     const move_loop_interval = 20;
     const delete_objects_interval = 250;
     const update_info_interval = 500;
@@ -236,6 +271,7 @@ window.addEventListener("load", () => {
     const player = new Player(canvas);
     let asteroids = load_asteroids(canvas);
     let bullets = new Array();
+    let fps_limiter = new FrameLimiter(60);
 
     window.addEventListener("keydown", (event) => {
         // 32 <=> Tecla espacio
@@ -254,7 +290,6 @@ window.addEventListener("load", () => {
             if (!collision(player, asteroid)) {
                 continue;
             }
-            console.log("You have been killed!");
         }
     }, kill_player_interval);
 
@@ -282,15 +317,22 @@ window.addEventListener("load", () => {
     }, delete_objects_interval);
 
     window.setInterval(() => {
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "White";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        fps_limiter.limit(() => {
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "White";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        for (const obj of (Array.concat([player], bullets, asteroids))) {
-            obj.draw();
-        }
+            ctx.fillStyle = "Black";
+            ctx.font = '28px serif';
+            ctx.fillText(`FPS: ${fps_limiter.fps()}`, 5, 30);
+            ctx.stroke();
 
-        ctx.stroke();
+            for (const obj of (Array.concat([player], bullets, asteroids))) {
+                obj.draw();
+            }
+
+            ctx.stroke();
+        });
     }, draw_loop_interval);
 
     window.setInterval(() => {
