@@ -327,8 +327,9 @@ window.addEventListener("load", () => {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = "Black";
-            ctx.font = '28px Cambria';
-            ctx.fillText(`FPS: ${fps_limiter.fps()}`, 5, 30);
+            ctx.font = '18px Cambria';
+            ctx.fillText(`FPS: ${fps_limiter.fps()}`, 5, 20);
+            ctx.fillText(`Asteroids: ${asteroids.length}`, 5, 35);
             ctx.stroke();
 
             for (const obj of (Array.concat([player], bullets, asteroids))) {
