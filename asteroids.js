@@ -274,15 +274,19 @@ window.addEventListener("load", () => {
     let fps_limiter = new FrameLimiter(60);
 
     window.addEventListener("keydown", (event) => {
-        // 32 <=> Tecla espacio
-        if (event.keyCode != 32) {
-            return;
+        switch (event.keyCode) {
+        case 32:
+            const bullet = new Bullet(canvas,
+                                      player.x, player.y,
+                                      calculate_dx(player.rotation, 10),
+                                      calculate_dy(player.rotation, 10),
+                                      player.rotation);
+            bullets.push(bullet);
+            break;
+        case 82:
+            asteroids = load_asteroids(canvas);
+            break;
         }
-        const bullet = new Bullet(canvas,
-                                  player.x, player.y,
-                                  calculate_dx(player.rotation, 10), calculate_dy(player.rotation, 10),
-                                  player.rotation);
-        bullets.push(bullet);
     });
 
     window.setInterval(() => {
@@ -323,7 +327,7 @@ window.addEventListener("load", () => {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = "Black";
-            ctx.font = '28px serif';
+            ctx.font = '28px Cambria';
             ctx.fillText(`FPS: ${fps_limiter.fps()}`, 5, 30);
             ctx.stroke();
 
